@@ -1,0 +1,180 @@
+import { useParams, useNavigate } from "react-router-dom";
+import { Card, Chip } from "../components/Card";
+import Button from "../components/Button";
+import Icon from "../components/Icon";
+import { useOrder, setOrderStatus } from "../store/useOrders";
+import { FLOW, statusMeta, primaryAction } from "../data/orderStatus";
+
+const steps = [
+  { key: "pending", label: "Accepted", icon: "receipt_long" },
+  { key: "preparing", label: "Preparing", icon: "skillet" },
+  { key: "ready", label: "Ready", icon: "shopping_bag" },
+  { key: "completed", label: "Picked Up", icon: "local_shipping" },
+];
+
+export default function OrderDetail() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const order = useOrder(`#${id}`);
+
+  if (!order) {
+    return (
+      <main className="flex-1 px-margin-mobile pt-16 text-center animate-fade-in">
+        <p className="text-body-md text-on-surface-variant">Order not found.</p>
+        <Button
+          variant="text"
+          onClick={() => navigate("/orders")}
+          className="mt-4"
+        >
+          Back to Orders
+        </Button>
+      </main>
+    );
+  }
+
+  const meta = statusMeta[order.status];
+  const action = primaryAction[order.status];
+  const activeIndex = FLOW.indexOf(order.status);
+  const isRejected = order.status === "rejected";
+
+  const update = (status) => {
+    setOrderStatus(order.id, status);
+    if (status === "rejected" || status === "completed") navigate("/orders");
+  };
+
+  return (
+    <main className="flex-1 px-margin-mobile pt-stack-md pb-32 animate-fade-in">
+      <button
+        onClick={() => navigate("/orders")}
+        className="flex items-center gap-1 text-on-surface-variant mb-stack-md active:scale-95"
+      >
+        <Icon name="arrow_back" />{" "}
+        <span className="text-label-lg font-label-lg">Orders</span>
+      </button>
+
+      {/* Header */}
+      <Card className="p-4 mb-stack-md">
+        <div className="flex justify-between items-start">
+          <div>
+            <h2 className="font-headline-md text-headline-md text-on-surface">
+              {order.customer}
+            </h2>
+            <p className="text-label-sm font-label-sm text-outline">
+              Order ID: {order.id}
+            </p>
+          </div>
+          <Chip tone={meta.chip}>{meta.label}</Chip>
+        </div>
+      </Card>
+
+      {/* Progress tracker (hidden when rejected) */}
+      {!isRejected && (
+        <Card className="p-4 mb-stack-md">
+          <div className="flex justify-between">
+            {steps.map((s, i) => {
+              const done = i <= activeIndex;
+              return (
+                <div
+                  key={s.key}
+                  className="flex-1 flex flex-col items-center gap-1 relative"
+                >
+                  {i > 0 && (
+                    <span
+                      className={`absolute top-5 right-1/2 w-full h-0.5 ${
+                        i <= activeIndex
+                          ? "bg-primary"
+                          : "bg-surface-container-highest"
+                      }`}
+                    />
+                  )}
+                  <div
+                    className={`relative z-10 w-10 h-10 rounded-full flex items-center justify-center ${
+                      done
+                        ? "bg-primary text-on-primary"
+                        : "bg-surface-container-highest text-outline"
+                    }`}
+                  >
+                    <Icon name={s.icon} className="text-[20px]" />
+                  </div>
+                  <span
+                    className={`text-label-sm font-label-sm ${
+                      done ? "text-on-surface" : "text-outline"
+                    }`}
+                  >
+                    {s.label}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+      )}
+
+      {/* Items */}
+      <Card className="p-4 mb-stack-md">
+        <h3 className="font-label-lg text-label-lg text-on-surface-variant mb-3">
+          Order Items
+        </h3>
+        <div className="space-y-2">
+          {order.items.map((item, i) => (
+            <div
+              key={i}
+              className="flex justify-between items-center text-body-md"
+            >
+              <span>{item.name}</span>
+              <span className="text-on-surface-variant">{item.price}</span>
+            </div>
+          ))}
+        </div>
+        <div className="pt-3 mt-3 border-t border-outline-variant flex justify-between items-center">
+          <span className="text-label-sm font-label-sm text-outline">
+            Total Amount
+          </span>
+          <span className="text-headline-md font-headline-md text-primary">
+            {order.total}
+          </span>
+        </div>
+      </Card>
+
+      {/* Action bar */}
+      <div className="fixed bottom-24 left-0 right-0 px-margin-mobile">
+        {order.status === "pending" ? (
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              full
+              onClick={() => update("rejected")}
+              icon="close"
+              iconRight={false}
+            >
+              Reject
+            </Button>
+            <Button
+              full
+              onClick={() => update(action.next)}
+              icon={action.icon}
+              iconRight={false}
+            >
+              {action.label}
+            </Button>
+          </div>
+        ) : action ? (
+          <Button
+            full
+            onClick={() => update(action.next)}
+            icon={action.icon}
+            iconRight={false}
+          >
+            {action.label}
+          </Button>
+        ) : (
+          <Card className="p-3 text-center">
+            <p className="text-label-lg font-label-lg text-on-surface-variant">
+              {isRejected ? "Order rejected" : "Order completed"}
+            </p>
+          </Card>
+        )}
+      </div>
+    </main>
+  );
+}

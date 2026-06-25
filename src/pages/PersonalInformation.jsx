@@ -31,14 +31,26 @@ export default function PersonalInformation() {
           className="space-y-stack-lg"
           onSubmit={(e) => {
             e.preventDefault();
-            navigate("/document-upload");
+            navigate("/address-details");
           }}
         >
-          <TextField label="Full Name" id="full-name" placeholder="e.g. Sunita Sharma" required />
-          <TextField label="Email Address (Optional)" id="email" type="email" placeholder="you@example.com" />
+          <TextField
+            label="Full Name"
+            id="full-name"
+            placeholder="e.g. Sunita Sharma"
+            required
+          />
+          <TextField
+            label="Email Address (Optional)"
+            id="email"
+            type="email"
+            placeholder="you@example.com"
+          />
 
           <div className="space-y-stack-sm">
-            <p className="text-label-lg font-label-lg text-on-surface-variant px-1">Gender</p>
+            <p className="text-label-lg font-label-lg text-on-surface-variant px-1">
+              Gender
+            </p>
             <div className="grid grid-cols-3 gap-2">
               {genders.map((g) => {
                 const active = gender === g.value;
@@ -54,7 +66,9 @@ export default function PersonalInformation() {
                     }`}
                   >
                     <Icon name={g.icon} />
-                    <span className="text-label-sm font-label-sm">{g.label}</span>
+                    <span className="text-label-sm font-label-sm">
+                      {g.label}
+                    </span>
                   </button>
                 );
               })}

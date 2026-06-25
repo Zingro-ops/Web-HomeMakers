@@ -9,7 +9,31 @@ import DocumentUpload from "./pages/DocumentUpload";
 import Dashboard from "./pages/Dashboard";
 import Orders from "./pages/Orders";
 import Menu from "./pages/Menu";
-import Placeholder from "./pages/Placeholder";
+import OrderDetail from "./pages/OrderDetail";
+import Plans from "./pages/Plans";
+import Profile from "./pages/Profile";
+import AddressDetails from "./pages/AddressDetails";
+import BankDetails from "./pages/BankDetails";
+import KitchenInformation from "./pages/KitchenInformation";
+import ReviewSubmit from "./pages/ReviewSubmit";
+
+import VerificationSubmitted from "./pages/VerificationSubmitted";
+import UnderReview from "./pages/UnderReview";
+import VerificationApproved from "./pages/VerificationApproved";
+import VerificationRejected from "./pages/VerificationRejected";
+import DocumentReupload from "./pages/DocumentReupload";
+
+import ManageCategories from "./pages/ManageCategories";
+import AddDish from "./pages/AddDish";
+
+import CreatePlan from "./pages/CreatePlan";
+
+import ProtectedRoute from "./components/ProtectedRoute";
+
+import Contact from "./pages/Contact";
+import ContactPublic from "./pages/ContactPublic";
+
+import Billing from "./pages/Billing";
 
 export default function App() {
   return (
@@ -23,15 +47,44 @@ export default function App() {
       <Route path="/document-upload" element={<DocumentUpload />} />
 
       {/* App shell (with bottom nav + drawer) */}
-      <Route element={<AppLayout />}>
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/orders" element={<Orders />} />
-        <Route path="/menu" element={<Menu />} />
-        <Route path="/plans" element={<Placeholder title="Subscription Plans" icon="subscriptions" />} />
-        <Route path="/profile" element={<Placeholder title="Your Profile" icon="person" />} />
+      <Route element={<ProtectedRoute />}>
+        <Route element={<AppLayout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/orders" element={<Orders />} />
+          <Route path="/menu" element={<Menu />} />
+          <Route path="/plans" element={<Plans />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/orders/:id" element={<OrderDetail />} />
+
+          <Route path="/address-details" element={<AddressDetails />} />
+          <Route path="/bank-details" element={<BankDetails />} />
+          <Route path="/kitchen-information" element={<KitchenInformation />} />
+          <Route path="/review-submit" element={<ReviewSubmit />} />
+
+          <Route
+            path="/verification-submitted"
+            element={<VerificationSubmitted />}
+          />
+          <Route path="/under-review" element={<UnderReview />} />
+          <Route
+            path="/verification-approved"
+            element={<VerificationApproved />}
+          />
+          <Route
+            path="/verification-rejected"
+            element={<VerificationRejected />}
+          />
+          <Route path="/document-reupload" element={<DocumentReupload />} />
+          <Route path="/billing" element={<Billing />} />
+        </Route>
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="/menu/add" element={<AddDish />} />
+      <Route path="/menu/categories" element={<ManageCategories />} />
+      <Route path="/contact" element={<ContactPublic />} />
+      <Route path="/support" element={<Contact />} />
+      <Route path="/plans/new" element={<CreatePlan />} />
     </Routes>
   );
 }
