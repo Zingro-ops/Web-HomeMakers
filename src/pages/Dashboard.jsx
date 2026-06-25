@@ -2,17 +2,28 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "../components/Card";
 import Icon from "../components/Icon";
 import { recentActivity } from "../data/mock";
+import { useSession } from "../store/useSession";
 
 function StatCard({ icon, iconClass, period, value, valueClass, label }) {
   return (
     <Card className="p-5 rounded-2xl flex flex-col justify-between h-40">
       <div className="flex justify-between items-start">
-        <span className={`material-symbols-outlined p-2 rounded-lg ${iconClass}`}>{icon}</span>
-        <span className="text-label-sm font-label-sm text-on-surface-variant">{period}</span>
+        <span
+          className={`material-symbols-outlined p-2 rounded-lg ${iconClass}`}
+        >
+          {icon}
+        </span>
+        <span className="text-label-sm font-label-sm text-on-surface-variant">
+          {period}
+        </span>
       </div>
       <div>
-        <span className={`text-[32px] font-bold leading-none ${valueClass}`}>{value}</span>
-        <p className="text-label-lg font-label-lg text-on-surface mt-1">{label}</p>
+        <span className={`text-[32px] font-bold leading-none ${valueClass}`}>
+          {value}
+        </span>
+        <p className="text-label-lg font-label-lg text-on-surface mt-1">
+          {label}
+        </p>
       </div>
     </Card>
   );
@@ -20,28 +31,71 @@ function StatCard({ icon, iconClass, period, value, valueClass, label }) {
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { verification } = useSession();
+
+  const banner = {
+    none: {
+      tone: "tertiary",
+      icon: "upload_file",
+      title: "Complete Verification",
+      sub: "Upload your documents to start receiving orders.",
+      to: "/document-upload",
+    },
+    submitted: {
+      tone: "tertiary",
+      icon: "hourglass_top",
+      title: "Verification Submitted",
+      sub: "We've received your documents and are reviewing them.",
+      to: "/verification-submitted",
+    },
+    review: {
+      tone: "tertiary",
+      icon: "schedule",
+      title: "Under Review",
+      sub: "Your documents are being verified. 24–48 hours.",
+      to: "/under-review",
+    },
+    approved: {
+      tone: "primary",
+      icon: "verified",
+      title: "Verified & Approved",
+      sub: "Your kitchen is live on ZINGRO.",
+      to: "/verification-approved",
+    },
+    rejected: {
+      tone: "error",
+      icon: "error",
+      title: "Verification Rejected",
+      sub: "Please re-upload the flagged documents.",
+      to: "/verification-rejected",
+    },
+  }[verification];
   return (
     <main className="max-w-md mx-auto px-margin-mobile pt-stack-lg animate-fade-in">
       <section className="mb-stack-lg">
-        <h1 className="text-headline-lg-mobile font-headline-lg-mobile text-on-surface">Namaste, Sunita!</h1>
+        <h1 className="text-headline-lg-mobile font-headline-lg-mobile text-on-surface">
+          Namaste, Sunita!
+        </h1>
         <p className="text-body-md text-on-surface-variant">
           Here is what's happening in your kitchen today.
         </p>
       </section>
 
-      <button
-        onClick={() => navigate("/document-upload")}
-        className="w-full flex items-center gap-4 p-4 mb-stack-lg rounded-xl border border-tertiary-container bg-tertiary-fixed text-on-tertiary-fixed shadow-card text-left"
-      >
-        <Icon name="verified_user" className="text-tertiary" />
-        <div className="flex-1">
-          <p className="text-label-lg font-label-lg">Verification Pending</p>
-          <p className="text-label-sm font-label-sm opacity-80">
-            Finish uploading your FSSAI certificate to start receiving orders.
-          </p>
-        </div>
-        <Icon name="chevron_right" />
-      </button>
+      {banner && (
+        <button
+          onClick={() => navigate(banner.to)}
+          className="w-full flex items-center gap-4 p-4 mb-stack-lg rounded-xl border border-tertiary-container bg-tertiary-fixed text-on-tertiary-fixed shadow-card text-left"
+        >
+          <Icon name={banner.icon} className="text-tertiary" />
+          <div className="flex-1">
+            <p className="text-label-lg font-label-lg">{banner.title}</p>
+            <p className="text-label-sm font-label-sm opacity-80">
+              {banner.sub}
+            </p>
+          </div>
+          <Icon name="chevron_right" />
+        </button>
+      )}
 
       <div className="grid grid-cols-2 gap-4">
         <StatCard
@@ -87,7 +141,9 @@ export default function Dashboard() {
       <Card className="p-4 rounded-2xl mt-stack-lg">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-headline-md font-headline-md">Recent Activity</h3>
-          <button className="text-primary text-label-lg font-label-lg">See All</button>
+          <button className="text-primary text-label-lg font-label-lg">
+            See All
+          </button>
         </div>
         <div className="space-y-4">
           {recentActivity.map((a, i) => (
@@ -98,11 +154,17 @@ export default function Dashboard() {
                 </div>
                 <div className="flex-1">
                   <p className="text-label-lg font-label-lg">{a.title}</p>
-                  <p className="text-label-sm font-label-sm text-on-surface-variant">{a.sub}</p>
+                  <p className="text-label-sm font-label-sm text-on-surface-variant">
+                    {a.sub}
+                  </p>
                 </div>
-                <span className="text-label-sm font-label-sm text-on-surface-variant">{a.time}</span>
+                <span className="text-label-sm font-label-sm text-on-surface-variant">
+                  {a.time}
+                </span>
               </div>
-              {i < recentActivity.length - 1 && <hr className="border-outline-variant mt-4" />}
+              {i < recentActivity.length - 1 && (
+                <hr className="border-outline-variant mt-4" />
+              )}
             </div>
           ))}
         </div>

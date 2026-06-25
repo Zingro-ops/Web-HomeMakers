@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import Icon from "./Icon";
-
+import { logout } from "../store/useSession";
 const navItems = [
   { icon: "payments", label: "Earnings" },
   { icon: "star", label: "Reviews", fill: true },
@@ -12,7 +12,9 @@ const navItems = [
 export default function SideDrawer({ open, onClose }) {
   const navigate = useNavigate();
   return (
-    <div className={`fixed inset-0 z-[100] ${open ? "" : "pointer-events-none"}`}>
+    <div
+      className={`fixed inset-0 z-[100] ${open ? "" : "pointer-events-none"}`}
+    >
       <div
         onClick={onClose}
         className={`absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${
@@ -30,8 +32,12 @@ export default function SideDrawer({ open, onClose }) {
               <Icon name="person" className="text-[32px]" />
             </div>
             <div>
-              <h2 className="text-headline-md font-headline-md text-on-surface">Sunita Sharma</h2>
-              <p className="text-label-sm font-label-sm text-on-surface-variant">Kitchen ID: ZG1234</p>
+              <h2 className="text-headline-md font-headline-md text-on-surface">
+                Sunita Sharma
+              </h2>
+              <p className="text-label-sm font-label-sm text-on-surface-variant">
+                Kitchen ID: ZG1234
+              </p>
             </div>
           </div>
         </div>
@@ -49,7 +55,11 @@ export default function SideDrawer({ open, onClose }) {
 
         <div className="p-4 mt-auto">
           <button
-            onClick={() => navigate("/login")}
+            onClick={() => {
+              logout();
+              onClose();
+              navigate("/login");
+            }}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 text-error font-bold rounded-xl active:bg-error-container transition-colors"
           >
             <Icon name="logout" /> Logout

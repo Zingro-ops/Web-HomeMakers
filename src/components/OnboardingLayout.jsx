@@ -1,8 +1,14 @@
 import TopAppBar from "./TopAppBar";
 import { ProgressBar } from "./Card";
+import { TOTAL_STEPS } from "../data/onboarding";
 
 /** Layout for multi-step onboarding screens (personal info, documents...). */
-export default function OnboardingLayout({ step, totalSteps = 8, stepLabel, children }) {
+export default function OnboardingLayout({
+  step,
+  totalSteps = TOTAL_STEPS,
+  stepLabel,
+  children,
+}) {
   const pct = (step / totalSteps) * 100;
   return (
     <div className="min-h-screen bg-surface flex flex-col">
@@ -13,7 +19,9 @@ export default function OnboardingLayout({ step, totalSteps = 8, stepLabel, chil
             <span className="text-label-sm font-label-sm text-primary font-bold">
               Step {step} of {totalSteps}
             </span>
-            <span className="text-label-sm font-label-sm text-on-surface-variant">{stepLabel}</span>
+            <span className="text-label-sm font-label-sm text-on-surface-variant">
+              {stepLabel}
+            </span>
           </div>
           <ProgressBar value={pct} />
         </div>

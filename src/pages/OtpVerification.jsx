@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import TopAppBar from "../components/TopAppBar";
 import Button from "../components/Button";
 import Icon from "../components/Icon";
+import { login } from "../store/useSession";
 
 export default function OtpVerification() {
   const [otp, setOtp] = useState(["", "", "", ""]);
@@ -35,6 +36,7 @@ export default function OtpVerification() {
       setError(true);
       return;
     }
+    login();
     navigate("/personal-information");
   };
 
@@ -63,7 +65,11 @@ export default function OtpVerification() {
                 inputMode="numeric"
                 maxLength={1}
                 className={`w-16 h-16 text-center text-headline-lg font-headline-lg rounded-xl bg-surface-container-lowest border-2 outline-none transition-all ${
-                  error ? "border-error" : digit ? "border-primary" : "border-outline-variant"
+                  error
+                    ? "border-error"
+                    : digit
+                      ? "border-primary"
+                      : "border-outline-variant"
                 } focus:border-primary`}
               />
             ))}
@@ -72,12 +78,16 @@ export default function OtpVerification() {
           {error && (
             <div className="flex items-center gap-2 text-error px-4 py-3 bg-error-container rounded-lg">
               <Icon name="error" className="text-base" />
-              <span className="text-label-lg font-label-lg">Incorrect OTP, please try again.</span>
+              <span className="text-label-lg font-label-lg">
+                Incorrect OTP, please try again.
+              </span>
             </div>
           )}
 
           <div className="flex items-center justify-center gap-2">
-            <p className="text-body-md text-on-surface-variant">Didn't receive code?</p>
+            <p className="text-body-md text-on-surface-variant">
+              Didn't receive code?
+            </p>
             <button
               disabled={seconds > 0}
               onClick={() => setSeconds(30)}
@@ -90,7 +100,10 @@ export default function OtpVerification() {
 
         <div className="mt-12 flex justify-center opacity-10">
           <div className="w-44 h-44 rounded-full bg-primary-container flex items-center justify-center">
-            <Icon name="shield_person" className="text-[96px] text-on-primary-container" />
+            <Icon
+              name="shield_person"
+              className="text-[96px] text-on-primary-container"
+            />
           </div>
         </div>
 

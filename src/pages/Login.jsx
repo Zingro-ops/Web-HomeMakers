@@ -1,10 +1,13 @@
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import TextField from "../components/TextField";
 import Button from "../components/Button";
 import Icon from "../components/Icon";
+import { login } from "../store/useSession";
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from || "/dashboard";
   return (
     <div className="relative min-h-screen flex flex-col overflow-hidden">
       {/* ambient background */}
@@ -25,27 +28,49 @@ export default function Login() {
             <h2 className="text-headline-lg-mobile font-headline-lg-mobile text-on-surface mb-2">
               Welcome Back
             </h2>
-            <p className="text-body-md text-on-surface-variant">Sign in to manage your kitchen</p>
+            <p className="text-body-md text-on-surface-variant">
+              Sign in to manage your kitchen
+            </p>
           </header>
 
           <form
             className="space-y-6"
             onSubmit={(e) => {
               e.preventDefault();
-              navigate("/dashboard");
+              login();
+              navigate(from, { replace: true });
             }}
           >
-            <TextField label="Phone Number" icon="call" id="phone" type="tel" placeholder="Enter 10 digit number" required />
+            <TextField
+              label="Phone Number"
+              icon="call"
+              id="phone"
+              type="tel"
+              placeholder="Enter 10 digit number"
+              required
+            />
             <div>
               <div className="flex justify-between items-center mb-2">
-                <label htmlFor="password" className="text-label-lg font-label-lg text-on-surface-variant">
+                <label
+                  htmlFor="password"
+                  className="text-label-lg font-label-lg text-on-surface-variant"
+                >
                   Password
                 </label>
-                <a href="#" className="text-secondary font-label-lg text-label-lg hover:underline">
+                <a
+                  href="#"
+                  className="text-secondary font-label-lg text-label-lg hover:underline"
+                >
                   Forgot Password?
                 </a>
               </div>
-              <TextField icon="lock" id="password" type="password" placeholder="Enter your password" required />
+              <TextField
+                icon="lock"
+                id="password"
+                type="password"
+                placeholder="Enter your password"
+                required
+              />
             </div>
             <Button full icon="arrow_forward" type="submit">
               Login
@@ -55,7 +80,10 @@ export default function Login() {
           <div className="mt-8 text-center border-t border-outline-variant pt-6">
             <p className="text-body-md text-on-surface-variant">
               Don't have an account?{" "}
-              <Link to="/signup" className="text-primary font-bold hover:underline">
+              <Link
+                to="/signup"
+                className="text-primary font-bold hover:underline"
+              >
                 Signup
               </Link>
             </p>
