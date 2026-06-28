@@ -21,7 +21,7 @@ export default function StatusCard({
   children,
 }) {
   return (
-    <main className="flex-1 px-margin-mobile pt-stack-lg pb-32 flex flex-col items-center text-center animate-fade-in">
+    <main className="min-h-screen bg-surface flex-1 px-margin-mobile pt-stack-lg pb-32 flex flex-col items-center text-center animate-fade-in">
       <div
         className={`w-24 h-24 rounded-full flex items-center justify-center mb-stack-lg ${tones[tone]}`}
       >
