@@ -52,6 +52,7 @@ export default function App() {
 
       {/* App shell (with bottom nav + drawer) */}
       <Route element={<ProtectedRoute />}>
+        {/* App screens — full layout with bottom navigation */}
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/orders" element={<Orders />} />
@@ -59,32 +60,32 @@ export default function App() {
           <Route path="/plans" element={<Plans />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/orders/:id" element={<OrderDetail />} />
-
-          <Route path="/address-details" element={<AddressDetails />} />
-          <Route path="/tax-details" element={<TaxDetails />} />
-          <Route path="/bank-details" element={<BankDetails />} />
-          <Route path="/fssai-details" element={<FssaiDetails />} />
-          <Route path="/about-food" element={<AboutFood />} />
-          <Route path="/kitchen-photos" element={<KitchenPhotos />} />
-          <Route path="/kitchen-information" element={<KitchenInformation />} />
-          <Route path="/review-submit" element={<ReviewSubmit />} />
-
-          <Route
-            path="/verification-submitted"
-            element={<VerificationSubmitted />}
-          />
-          <Route path="/under-review" element={<UnderReview />} />
-          <Route
-            path="/verification-approved"
-            element={<VerificationApproved />}
-          />
-          <Route
-            path="/verification-rejected"
-            element={<VerificationRejected />}
-          />
-          <Route path="/document-reupload" element={<DocumentReupload />} />
           <Route path="/billing" element={<Billing />} />
         </Route>
+
+        {/* Onboarding & verification — no bottom navigation */}
+        <Route path="/address-details" element={<AddressDetails />} />
+        <Route path="/tax-details" element={<TaxDetails />} />
+        <Route path="/bank-details" element={<BankDetails />} />
+        <Route path="/fssai-details" element={<FssaiDetails />} />
+        <Route path="/about-food" element={<AboutFood />} />
+        <Route path="/kitchen-photos" element={<KitchenPhotos />} />
+        <Route path="/kitchen-information" element={<KitchenInformation />} />
+        <Route path="/review-submit" element={<ReviewSubmit />} />
+        <Route
+          path="/verification-submitted"
+          element={<VerificationSubmitted />}
+        />
+        <Route path="/under-review" element={<UnderReview />} />
+        <Route
+          path="/verification-approved"
+          element={<VerificationApproved />}
+        />
+        <Route
+          path="/verification-rejected"
+          element={<VerificationRejected />}
+        />
+        <Route path="/document-reupload" element={<DocumentReupload />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
