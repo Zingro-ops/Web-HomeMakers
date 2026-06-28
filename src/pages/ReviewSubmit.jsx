@@ -4,7 +4,7 @@ import OnboardingLayout from "../components/OnboardingLayout";
 import { Card } from "../components/Card";
 import Button from "../components/Button";
 import Icon from "../components/Icon";
-import { STEPS, subscriptionPlans } from "../data/onboarding";
+import { STEPS } from "../data/onboarding";
 import { setVerification } from "../store/useSession";
 import { useOnboarding } from "../store/useOnboarding";
 import LegalModal, {
@@ -20,9 +20,6 @@ export default function ReviewSubmit() {
   const [privacy, setPrivacy] = useState(false);
   const [legal, setLegal] = useState(null); // "terms" | "privacy" | null
   const [err, setErr] = useState("");
-
-  const planName =
-    subscriptionPlans.find((p) => p.id === d.subscription?.plan)?.name || "—";
 
   const sections = [
     {
@@ -68,12 +65,6 @@ export default function ReviewSubmit() {
       sub:
         [d.food?.cuisine, d.food?.category].filter(Boolean).join(" · ") || "—",
       to: "/about-food",
-    },
-    {
-      icon: "workspace_premium",
-      title: "Subscription",
-      sub: planName,
-      to: "/subscription",
     },
     {
       icon: "photo_camera",
