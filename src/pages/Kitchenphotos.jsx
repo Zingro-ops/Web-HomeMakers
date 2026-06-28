@@ -168,7 +168,7 @@ export default function KitchenPhotos() {
 
         {err && <p className="text-label-sm font-label-sm text-error">{err}</p>}
         <Button full icon="arrow_forward" onClick={submit}>
-          Continue
+          Continue..
         </Button>
       </Card>
 
