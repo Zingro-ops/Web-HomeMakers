@@ -1,16 +1,65 @@
 import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import TextField from "../components/TextField";
 import Button from "../components/Button";
 import Icon from "../components/Icon";
 import { login } from "../store/useSession";
+import { initializeMsg91, sendOtp, verifyOtp } from "../services/msg91";
 
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [loading, setLoading] = useState(false);
   const from = location.state?.from || "/dashboard";
+
+  useEffect(() => {
+    initializeMsg91();
+  }, []);
+
+  const handleSendOtp = async () => {
+    setLoading(true);
+    try {
+      await sendOtp(phone);
+      setOtpSent(true);
+    } catch (err) {
+      console.error("Send OTP failed:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    setLoading(true);
+    try {
+      const result = await verifyOtp(otp);
+      const response = await axios.post(
+        "http://localhost:5000/api/v1/auth/verify-otp",
+        { accessToken: result.message },
+      );
+      login(response.data.data);
+      navigate(from);
+    } catch (err) {
+      console.error("Verify OTP failed:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!otpSent) {
+      handleSendOtp();
+    } else {
+      handleVerifyOtp();
+    }
+  };
+
   return (
     <div className="relative min-h-screen flex flex-col overflow-hidden">
-      {/* ambient background */}
       <div className="fixed inset-0 -z-10 opacity-30 pointer-events-none">
         <div className="absolute -top-[10%] -right-[5%] w-[400px] h-[400px] bg-primary-fixed-dim rounded-full blur-[120px]" />
         <div className="absolute -bottom-[10%] -left-[5%] w-[300px] h-[300px] bg-secondary-container rounded-full blur-[120px]" />
@@ -33,47 +82,39 @@ export default function Login() {
             </p>
           </header>
 
-          <form
-            className="space-y-6"
-            onSubmit={(e) => {
-              e.preventDefault();
-              login();
-              navigate(from, { replace: true });
-            }}
-          >
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <TextField
               label="Phone Number"
               icon="call"
               id="phone"
               type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
               placeholder="Enter 10 digit number"
+              disabled={otpSent}
               required
             />
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <label
-                  htmlFor="password"
-                  className="text-label-lg font-label-lg text-on-surface-variant"
-                >
-                  Password
-                </label>
-                <a
-                  href="#"
-                  className="text-secondary font-label-lg text-label-lg hover:underline"
-                >
-                  Forgot Password?
-                </a>
-              </div>
+            {otpSent && (
               <TextField
-                icon="lock"
-                id="password"
-                type="password"
-                placeholder="Enter your password"
+                label="OTP"
+                icon="password"
+                id="otp"
+                type="text"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                placeholder="Enter 6-digit OTP"
+                maxLength={6}
                 required
               />
-            </div>
-            <Button full icon="arrow_forward" type="submit">
-              Login
+            )}
+
+            <Button
+              full
+              icon={otpSent ? "verified_user" : "sms"}
+              type="submit"
+              disabled={loading}
+            >
+              {loading ? "Please wait..." : otpSent ? "Verify OTP" : "Send OTP"}
             </Button>
           </form>
 
