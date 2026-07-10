@@ -1,16 +1,27 @@
 import { useNavigate, Link } from "react-router-dom";
+import { useState } from "react";
 import TopAppBar from "../components/TopAppBar";
 import TextField from "../components/TextField";
 import Button from "../components/Button";
 
 export default function Signup() {
   const navigate = useNavigate();
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    navigate("/otp", { state: { name, phone } });
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <TopAppBar logo right={null} />
       <main className="w-full max-w-md mx-auto px-margin-mobile py-stack-lg flex-1 flex flex-col">
         <div className="relative w-full h-40 mb-stack-lg rounded-xl overflow-hidden bg-primary-fixed/40 flex items-center justify-center">
-          <span className="material-symbols-outlined text-primary text-[64px]">storefront</span>
+          <span className="material-symbols-outlined text-primary text-[64px]">
+            storefront
+          </span>
         </div>
 
         <div className="mb-stack-lg">
@@ -22,14 +33,16 @@ export default function Signup() {
           </p>
         </div>
 
-        <form
-          className="space-y-gutter"
-          onSubmit={(e) => {
-            e.preventDefault();
-            navigate("/otp");
-          }}
-        >
-          <TextField label="Full Name" icon="person" id="name" placeholder="e.g. Sunita Sharma" required />
+        <form className="space-y-gutter" onSubmit={handleSubmit}>
+          <TextField
+            label="Full Name"
+            icon="person"
+            id="name"
+            placeholder="e.g. Sunita Sharma"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
           <TextField
             label="Phone Number"
             icon="call"
@@ -37,9 +50,16 @@ export default function Signup() {
             id="phone"
             type="tel"
             placeholder="10-digit mobile number"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
             required
           />
-          <Button full icon="arrow_forward" type="submit" className="mt-stack-md">
+          <Button
+            full
+            icon="arrow_forward"
+            type="submit"
+            className="mt-stack-md"
+          >
             Get OTP
           </Button>
         </form>
@@ -50,19 +70,6 @@ export default function Signup() {
             Login
           </Link>
         </p>
-
-        <div className="flex items-center my-stack-lg">
-          <div className="flex-1 border-t border-outline-variant" />
-          <span className="px-4 text-label-sm font-label-sm text-outline uppercase tracking-wider">
-            or join with
-          </span>
-          <div className="flex-1 border-t border-outline-variant" />
-        </div>
-
-        <div className="grid grid-cols-2 gap-gutter">
-          <Button variant="outline">Google</Button>
-          <Button variant="outline">Facebook</Button>
-        </div>
       </main>
     </div>
   );
