@@ -1,16 +1,34 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, Navigate } from "react-router-dom";
+import axios from "axios";
 import TopAppBar from "../components/TopAppBar";
 import Button from "../components/Button";
 import Icon from "../components/Icon";
 import { login } from "../store/useSession";
+import { initializeMsg91, sendOtp, verifyOtp } from "../services/msg91";
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 export default function OtpVerification() {
-  const [otp, setOtp] = useState(["", "", "", ""]);
-  const [error, setError] = useState(false);
-  const [seconds, setSeconds] = useState(30);
-  const refs = useRef([]);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { name, phone } = location.state || {};
+
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [error, setError] = useState("");
+  const [seconds, setSeconds] = useState(30);
+  const [sending, setSending] = useState(true);
+  const [verifying, setVerifying] = useState(false);
+  const refs = useRef([]);
+
+  useEffect(() => {
+    if (!phone) return;
+    initializeMsg91()
+      .then(() => sendOtp(phone))
+      .catch((err) => setError(err.message || "Failed to send OTP"))
+      .finally(() => setSending(false));
+  }, [phone]);
 
   useEffect(() => {
     if (seconds <= 0) return;
@@ -18,26 +36,60 @@ export default function OtpVerification() {
     return () => clearTimeout(t);
   }, [seconds]);
 
+  if (!phone) {
+    return <Navigate to="/signup" replace />;
+  }
+
   const handleChange = (i, val) => {
     if (!/^\d?$/.test(val)) return;
     const next = [...otp];
     next[i] = val;
     setOtp(next);
-    setError(false);
-    if (val && i < 3) refs.current[i + 1]?.focus();
+    setError("");
+    if (val && i < 5) refs.current[i + 1]?.focus();
   };
 
   const handleKeyDown = (i, e) => {
     if (e.key === "Backspace" && !otp[i] && i > 0) refs.current[i - 1]?.focus();
   };
 
-  const verify = () => {
-    if (otp.join("").length < 4) {
-      setError(true);
+  const handleResend = async () => {
+    setSeconds(30);
+    setError("");
+    try {
+      await sendOtp(phone);
+    } catch (err) {
+      setError(err.message || "Failed to resend OTP");
+    }
+  };
+
+  const verify = async () => {
+    const code = otp.join("");
+    if (code.length < 6) {
+      setError("Please enter the complete 6-digit OTP.");
       return;
     }
-    login();
-    navigate("/personal-information");
+
+    setVerifying(true);
+    setError("");
+    try {
+      const result = await verifyOtp(code);
+
+      const response = await axios.post(
+        `${API_BASE_URL}/api/v1/auth/verify-otp`,
+        { accessToken: result.message, name, role: "homemaker" },
+      );
+
+      const { user, accessToken, refreshToken } = response.data.data;
+      login({ user, accessToken, refreshToken });
+      navigate("/personal-information");
+    } catch (err) {
+      setError(
+        err.response?.data?.message || "Incorrect OTP, please try again.",
+      );
+    } finally {
+      setVerifying(false);
+    }
   };
 
   return (
@@ -49,7 +101,8 @@ export default function OtpVerification() {
             Verify Phone Number
           </h1>
           <p className="text-body-md text-on-surface-variant">
-            Enter the 4-digit code sent to +91 XXXXX XXXXX
+            {sending ? "Sending code to" : "Enter the 6-digit code sent to"} +91{" "}
+            {phone}
           </p>
         </div>
 
@@ -64,7 +117,8 @@ export default function OtpVerification() {
                 onKeyDown={(e) => handleKeyDown(i, e)}
                 inputMode="numeric"
                 maxLength={1}
-                className={`w-16 h-16 text-center text-headline-lg font-headline-lg rounded-xl bg-surface-container-lowest border-2 outline-none transition-all ${
+                disabled={sending}
+                className={`w-12 h-16 text-center text-headline-lg font-headline-lg rounded-xl bg-surface-container-lowest border-2 outline-none transition-all ${
                   error
                     ? "border-error"
                     : digit
@@ -78,9 +132,7 @@ export default function OtpVerification() {
           {error && (
             <div className="flex items-center gap-2 text-error px-4 py-3 bg-error-container rounded-lg">
               <Icon name="error" className="text-base" />
-              <span className="text-label-lg font-label-lg">
-                Incorrect OTP, please try again.
-              </span>
+              <span className="text-label-lg font-label-lg">{error}</span>
             </div>
           )}
 
@@ -90,7 +142,7 @@ export default function OtpVerification() {
             </p>
             <button
               disabled={seconds > 0}
-              onClick={() => setSeconds(30)}
+              onClick={handleResend}
               className="text-primary font-label-lg hover:underline disabled:text-outline disabled:no-underline"
             >
               {seconds > 0 ? `Resend OTP (${seconds}s)` : "Resend OTP"}
@@ -98,19 +150,15 @@ export default function OtpVerification() {
           </div>
         </div>
 
-        <div className="mt-12 flex justify-center opacity-10">
-          <div className="w-44 h-44 rounded-full bg-primary-container flex items-center justify-center">
-            <Icon
-              name="shield_person"
-              className="text-[96px] text-on-primary-container"
-            />
-          </div>
-        </div>
-
         <div className="flex-grow" />
         <div className="py-stack-lg">
-          <Button full icon="arrow_forward" onClick={verify}>
-            Verify &amp; Continue
+          <Button
+            full
+            icon="arrow_forward"
+            onClick={verify}
+            disabled={verifying || sending}
+          >
+            {verifying ? "Verifying..." : "Verify & Continue"}
           </Button>
         </div>
       </main>

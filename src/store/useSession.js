@@ -7,8 +7,14 @@ const saved = (() => {
     return null;
   }
 })();
-// verification: "none" | "submitted" | "review" | "approved" | "rejected"
-let state = saved || { authed: false, verification: "none" };
+
+let state = saved || {
+  authed: false,
+  user: null,
+  accessToken: null,
+  refreshToken: null,
+  verification: "none",
+};
 const listeners = new Set();
 
 const emit = () => {
@@ -24,9 +30,21 @@ const set = (patch) => {
   emit();
 };
 
-export const login = () => set({ authed: true });
-export const logout = () => set({ authed: false, verification: "none" });
+export const login = ({ user, accessToken, refreshToken }) =>
+  set({ authed: true, user, accessToken, refreshToken });
+
+export const logout = () =>
+  set({
+    authed: false,
+    user: null,
+    accessToken: null,
+    refreshToken: null,
+    verification: "none",
+  });
+
 export const setVerification = (verification) => set({ verification });
+
+export const getAccessToken = () => state.accessToken;
 
 export function useSession() {
   return useSyncExternalStore(subscribe, getSnapshot);
