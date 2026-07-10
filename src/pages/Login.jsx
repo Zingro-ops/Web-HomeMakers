@@ -37,7 +37,7 @@ export default function Login() {
     try {
       const result = await verifyOtp(otp);
       const response = await axios.post(
-        "http://localhost:5000/api/v1/auth/verify-otp",
+        "https://zingro.in/auth-api/api/v1/auth/verify-otp",
         { accessToken: result.message },
       );
       login(response.data.data);
