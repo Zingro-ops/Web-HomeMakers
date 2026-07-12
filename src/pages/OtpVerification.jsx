@@ -8,12 +8,13 @@ import { login } from "../store/useSession";
 import { initializeMsg91, sendOtp, verifyOtp } from "../services/msg91";
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+  import.meta.env.VITE_API_BASE_URL || "https://zingro.in/auth-api";
 
 export default function OtpVerification() {
   const navigate = useNavigate();
   const location = useLocation();
   const { name, phone } = location.state || {};
+  const [otpSent, setOtpSent] = useState(false);
 
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [error, setError] = useState("");
@@ -23,18 +24,19 @@ export default function OtpVerification() {
   const refs = useRef([]);
 
   useEffect(() => {
-    if (!phone) return;
-    initializeMsg91()
-      .then(() => sendOtp(phone))
-      .catch((err) => setError(err.message || "Failed to send OTP"))
-      .finally(() => setSending(false));
-  }, [phone]);
-
-  useEffect(() => {
     if (seconds <= 0) return;
     const t = setTimeout(() => setSeconds((s) => s - 1), 1000);
     return () => clearTimeout(t);
   }, [seconds]);
+
+  useEffect(() => {
+    if (!phone) return;
+    initializeMsg91()
+      .then(() => sendOtp(phone))
+      .then(() => setOtpSent(true))
+      .catch((err) => setError(err.message || "Failed to send OTP"))
+      .finally(() => setSending(false));
+  }, [phone]);
 
   if (!phone) {
     return <Navigate to="/signup" replace />;
@@ -58,7 +60,9 @@ export default function OtpVerification() {
     setError("");
     try {
       await sendOtp(phone);
+      setOtpSent(true);
     } catch (err) {
+      setOtpSent(false);
       setError(err.message || "Failed to resend OTP");
     }
   };
@@ -156,7 +160,7 @@ export default function OtpVerification() {
             full
             icon="arrow_forward"
             onClick={verify}
-            disabled={verifying || sending}
+            disabled={verifying || sending || !otpSent}
           >
             {verifying ? "Verifying..." : "Verify & Continue"}
           </Button>
