@@ -7,6 +7,7 @@ import Icon from "../components/Icon";
 import CameraCapture from "../components/CameraCapture";
 import { STEPS } from "../data/onboarding";
 import { saveStep } from "../store/useOnboarding";
+import api from "../services/api";
 
 function PhotoTile({ label, photo, onCamera, onFile }) {
   return (
@@ -56,6 +57,24 @@ function PhotoTile({ label, photo, onCamera, onFile }) {
   );
 }
 
+// Normalize to a type S3/backend accepts; default to jpeg if unrecognized.
+const normalizeContentType = (type) =>
+  type === "image/png" ? "image/png" : "image/jpeg";
+
+async function uploadPhoto(type, file) {
+  const contentType = normalizeContentType(file.type);
+  const { data: presignData } = await api.post("/api/uploads/presign", {
+    type,
+    contentType,
+  });
+  await fetch(presignData.url, {
+    method: "PUT",
+    headers: { "Content-Type": contentType },
+    body: file,
+  });
+  await api.post("/api/uploads/confirm", { type, key: presignData.key });
+}
+
 // location: "loading" | "ok" | "denied"
 export default function KitchenPhotos() {
   const navigate = useNavigate();
@@ -66,6 +85,7 @@ export default function KitchenPhotos() {
   const [profile, setProfile] = useState(null);
   const [camFor, setCamFor] = useState(null); // "kitchen" | "profile" | null
   const [err, setErr] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const requestLocation = () => {
     setLocState("loading");
@@ -95,19 +115,47 @@ export default function KitchenPhotos() {
     setCamFor(null);
   };
 
-  const submit = () => {
+  const submit = async () => {
     if (locState !== "ok" || !gps)
       return setErr(
         "Location is required. Tap 'Enable location' and allow access.",
       );
     if (!kitchen || !profile)
       return setErr("Please add both a kitchen photo and a profile picture.");
-    saveStep("photos", {
-      gps,
-      kitchenName: kitchen.file.name,
-      profileName: profile.file.name,
-    });
-    navigate(s.next);
+
+    setErr("");
+    setSaving(true);
+    try {
+      // 1. Persist GPS via the draft step first — the backend's upload-confirm
+      //    step checks photo GPS against this saved value.
+      await api.post("/api/onboarding/draft", {
+        step: "photos",
+        data: {
+          gps,
+          kitchenName: kitchen.file.name,
+          profileName: profile.file.name,
+        },
+      });
+
+      // 2. Upload both photos (presign -> S3 PUT -> confirm).
+      await uploadPhoto("kitchen", kitchen.file);
+      await uploadPhoto("profile", profile.file);
+
+      saveStep("photos", {
+        gps,
+        kitchenName: kitchen.file.name,
+        profileName: profile.file.name,
+      });
+      navigate(s.next);
+    } catch (error) {
+      setErr(
+        error.response?.data?.error ||
+          error.response?.data?.details?.[0]?.message ||
+          "Failed to upload photos. Please try again.",
+      );
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -167,8 +215,8 @@ export default function KitchenPhotos() {
         />
 
         {err && <p className="text-label-sm font-label-sm text-error">{err}</p>}
-        <Button full icon="arrow_forward" onClick={submit}>
-          Continue..
+        <Button full icon="arrow_forward" onClick={submit} disabled={saving}>
+          {saving ? "Uploading..." : "Continue.."}
         </Button>
       </Card>
 
