@@ -4,8 +4,10 @@ import OnboardingLayout from "../components/OnboardingLayout";
 import { Card } from "../components/Card";
 import TextField from "../components/TextField";
 import Button from "../components/Button";
+import Icon from "../components/Icon";
 import { STEPS } from "../data/onboarding";
 import { saveStep } from "../store/useOnboarding";
+import api from "../services/api";
 
 const IFSC_RE = /^[A-Z]{4}0[A-Z0-9]{6}$/;
 
@@ -14,19 +16,34 @@ export default function BankDetails() {
   const s = STEPS.bank;
   const [form, setForm] = useState({ holder: "", account: "", ifsc: "" });
   const [err, setErr] = useState("");
+  const [saving, setSaving] = useState(false);
   const set = (k) => (e) =>
     setForm({
       ...form,
       [k]: k === "ifsc" ? e.target.value.toUpperCase() : e.target.value,
     });
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
     if (form.account.length < 8) return setErr("Enter a valid account number.");
     if (!IFSC_RE.test(form.ifsc))
       return setErr("Enter a valid IFSC (e.g. HDFC0001234).");
-    saveStep("bank", form);
-    navigate(s.next);
+
+    setErr("");
+    setSaving(true);
+    try {
+      await api.post("/api/onboarding/draft", { step: "bank", data: form });
+      saveStep("bank", form);
+      navigate(s.next);
+    } catch (error) {
+      setErr(
+        error.response?.data?.error ||
+          error.response?.data?.details?.[0]?.message ||
+          "Failed to save. Please try again.",
+      );
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -66,10 +83,13 @@ export default function BankDetails() {
             required
           />
           {err && (
-            <p className="text-label-sm font-label-sm text-error">{err}</p>
+            <div className="flex items-center gap-2 text-error px-4 py-3 bg-error-container rounded-lg">
+              <Icon name="error" className="text-base" />
+              <span className="text-label-lg font-label-lg">{err}</span>
+            </div>
           )}
-          <Button full icon="arrow_forward" type="submit">
-            Continue
+          <Button full icon="arrow_forward" type="submit" disabled={saving}>
+            {saving ? "Saving..." : "Continue"}
           </Button>
         </form>
       </Card>
