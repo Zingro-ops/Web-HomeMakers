@@ -2,8 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import OnboardingLayout from "../components/OnboardingLayout";
 import { Card } from "../components/Card";
-import TextField from "../components/TextField";
 import Button from "../components/Button";
+import Icon from "../components/Icon";
 import {
   STEPS,
   cuisines,
@@ -11,6 +11,7 @@ import {
   serviceRadii,
 } from "../data/onboarding";
 import { saveStep } from "../store/useOnboarding";
+import api from "../services/api";
 
 function Select({ label, id, options, value, onChange, placeholder }) {
   return (
@@ -50,12 +51,27 @@ export default function AboutFood() {
     radius: "",
     description: "",
   });
+  const [err, setErr] = useState("");
+  const [saving, setSaving] = useState(false);
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    saveStep("food", form);
-    navigate(s.next);
+    setErr("");
+    setSaving(true);
+    try {
+      await api.post("/api/onboarding/draft", { step: "food", data: form });
+      saveStep("food", form);
+      navigate(s.next);
+    } catch (error) {
+      setErr(
+        error.response?.data?.error ||
+          error.response?.data?.details?.[0]?.message ||
+          "Failed to save. Please try again.",
+      );
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -109,8 +125,14 @@ export default function AboutFood() {
               required
             />
           </div>
-          <Button full icon="arrow_forward" type="submit">
-            Continue
+          {err && (
+            <div className="flex items-center gap-2 text-error px-4 py-3 bg-error-container rounded-lg">
+              <Icon name="error" className="text-base" />
+              <span className="text-label-lg font-label-lg">{err}</span>
+            </div>
+          )}
+          <Button full icon="arrow_forward" type="submit" disabled={saving}>
+            {saving ? "Saving..." : "Continue"}
           </Button>
         </form>
       </Card>
