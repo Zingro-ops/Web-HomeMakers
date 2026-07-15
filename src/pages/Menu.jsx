@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "../components/Card";
 import Icon from "../components/Icon";
-import { useDishes, toggleDish } from "../store/useDishes";
+import { useDishes, fetchDishes, toggleDish } from "../store/useDishes";
 
 function Toggle({ checked, onChange }) {
   return (
@@ -22,16 +22,20 @@ function Toggle({ checked, onChange }) {
 }
 
 export default function Menu() {
-  const dishes = useDishes();
+  const { dishes, loading, error } = useDishes();
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchDishes();
+  }, []);
 
   const filtered = dishes.filter((d) =>
     d.name.toLowerCase().includes(query.toLowerCase()),
   );
 
   return (
-    <main className="px-margin-mobile pt-stack-md space-y-stack-lg animate-fade-in">
+    <main className="px-margin-mobile pt-stack-md space-y-stack-lg animate-fade-in pb-32">
       <section className="flex justify-between items-start">
         <div>
           <h2 className="text-headline-lg-mobile font-headline-lg-mobile text-on-surface">
@@ -42,7 +46,6 @@ export default function Menu() {
           </p>
         </div>
       </section>
-
       <section className="flex gap-stack-sm items-center">
         <div className="relative flex-grow">
           <Icon
@@ -65,9 +68,21 @@ export default function Menu() {
         </button>
       </section>
 
+      {error && (
+        <p className="text-label-sm font-label-sm text-error">{error}</p>
+      )}
+      {loading && (
+        <p className="text-body-md text-on-surface-variant">Loading menu…</p>
+      )}
+      {!loading && filtered.length === 0 && (
+        <p className="text-center text-on-surface-variant py-16 text-body-md">
+          No dishes yet. Tap + to add your first dish.
+        </p>
+      )}
+
       <section className="grid grid-cols-1 gap-stack-md">
         {filtered.map((dish) => (
-          <Card key={dish.name} className="overflow-hidden flex flex-col">
+          <Card key={dish._id} className="overflow-hidden flex flex-col">
             <div className="relative h-32 bg-surface-container-high flex items-center justify-center">
               <Icon name="restaurant" className="text-[48px] text-outline" />
               {dish.tag && (
@@ -82,7 +97,7 @@ export default function Menu() {
                   {dish.name}
                 </h3>
                 <span className="text-headline-md font-headline-md text-primary">
-                  {dish.price}
+                  ₹{dish.price}
                 </span>
               </div>
               <p className="text-on-surface-variant text-body-md line-clamp-2">
@@ -95,7 +110,7 @@ export default function Menu() {
                   </span>
                   <Toggle
                     checked={dish.available}
-                    onChange={() => toggleDish(dish.name)}
+                    onChange={() => toggleDish(dish._id)}
                   />
                 </div>
                 <button className="flex items-center gap-1 text-primary font-label-lg px-2 py-1 rounded-lg hover:bg-surface-container-high transition-colors">
