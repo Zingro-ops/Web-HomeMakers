@@ -84,7 +84,15 @@ export default function Menu() {
         {filtered.map((dish) => (
           <Card key={dish._id} className="overflow-hidden flex flex-col">
             <div className="relative h-32 bg-surface-container-high flex items-center justify-center">
-              <Icon name="restaurant" className="text-[48px] text-outline" />
+              {dish.imageUrl ? (
+                <img
+                  src={dish.imageUrl}
+                  alt={dish.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <Icon name="restaurant" className="text-[48px] text-outline" />
+              )}
               {dish.tag && (
                 <span className="absolute top-2 right-2 bg-primary-container text-on-primary px-2 py-1 rounded-lg text-label-sm font-label-sm shadow-card">
                   {dish.tag}
