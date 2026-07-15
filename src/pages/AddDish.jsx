@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import TopAppBar from "../components/TopAppBar";
 import TextField from "../components/TextField";
 import Button from "../components/Button";
+import Icon from "../components/Icon";
 import { addDish } from "../store/useDishes";
 import { categories } from "../data/mock";
 
@@ -14,17 +15,32 @@ export default function AddDish() {
     price: "",
     desc: "",
   });
+  const [err, setErr] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    addDish({
-      name: form.name.trim(),
-      price: form.price ? `₹${form.price}` : "₹0",
-      desc: form.desc.trim(),
-    });
-    navigate("/menu");
+    setErr("");
+    setSaving(true);
+    try {
+      await addDish({
+        name: form.name.trim(),
+        category: form.category,
+        price: Number(form.price),
+        desc: form.desc.trim(),
+      });
+      navigate("/menu");
+    } catch (error) {
+      setErr(
+        error.response?.data?.error ||
+          error.response?.data?.details?.[0]?.message ||
+          "Failed to add dish. Please try again.",
+      );
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -96,8 +112,15 @@ export default function AddDish() {
             />
           </div>
 
-          <Button full type="submit">
-            Create Dish
+          {err && (
+            <div className="flex items-center gap-2 text-error px-4 py-3 bg-error-container rounded-lg">
+              <Icon name="error" className="text-base" />
+              <span className="text-label-lg font-label-lg">{err}</span>
+            </div>
+          )}
+
+          <Button full type="submit" disabled={saving}>
+            {saving ? "Saving..." : "Create Dish"}
           </Button>
         </form>
       </main>
