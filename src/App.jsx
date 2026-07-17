@@ -41,18 +41,18 @@ import Billing from "./pages/Billing";
 import AdminCooksList from "./pages/AdminCooksList";
 import AdminCookDetail from "./pages/AdminCooksDetail";
 import AdminRoute from "./routes/AdminRoutes";
-
+import Landing from "./pages/Landing";
 export default function App() {
   return (
     <Routes>
       {/* Auth & onboarding (no bottom nav) */}
-      <Route path="/" element={<LanguageSelection />} />
+      <Route path="/" element={<Landing />} />
+      <Route path="/language" element={<LanguageSelection />} />{" "}
       <Route path="/signup" element={<Signup />} />
       <Route path="/otp" element={<OtpVerification />} />
       <Route path="/login" element={<Login />} />
       <Route path="/personal-information" element={<PersonalInformation />} />
       <Route path="/document-upload" element={<DocumentUpload />} />
-
       {/* App shell (with bottom nav + drawer) */}
       <Route element={<ProtectedRoute />}>
         {/* App screens — full layout with bottom navigation */}
@@ -90,7 +90,6 @@ export default function App() {
         />
         <Route path="/document-reupload" element={<DocumentReupload />} />
       </Route>
-
       <Route path="*" element={<Navigate to="/" replace />} />
       <Route path="/menu/add" element={<AddDish />} />
       <Route path="/menu/categories" element={<ManageCategories />} />
