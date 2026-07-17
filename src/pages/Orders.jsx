@@ -1,16 +1,22 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, Chip } from "../components/Card";
 import Icon from "../components/Icon";
-import { useOrders } from "../store/useOrders";
+import { useOrdersState, fetchOrders } from "../store/useOrders";
 import { statusMeta } from "../data/orderStatus";
 
 const tabs = ["New", "Active", "History"];
+const inr = (n) => `₹${Number(n).toLocaleString("en-IN")}`;
 
 export default function Orders() {
   const [tab, setTab] = useState("New");
   const navigate = useNavigate();
-  const orders = useOrders();
+  const { orders, loading, error } = useOrdersState();
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
   const visible = orders.filter((o) => statusMeta[o.status]?.tab === tab);
 
   return (
@@ -31,8 +37,17 @@ export default function Orders() {
         ))}
       </nav>
 
+      {error && (
+        <p className="text-label-sm font-label-sm text-error mb-stack-md">
+          {error}
+        </p>
+      )}
+      {loading && (
+        <p className="text-body-md text-on-surface-variant">Loading orders…</p>
+      )}
+
       <section className="flex flex-col gap-stack-md">
-        {visible.length === 0 && (
+        {!loading && visible.length === 0 && (
           <div className="text-center text-on-surface-variant py-16">
             <p className="text-body-md">
               No {tab.toLowerCase()} orders right now.
@@ -44,17 +59,17 @@ export default function Orders() {
           const meta = statusMeta[order.status];
           return (
             <Card
-              key={order.id}
-              onClick={() => navigate(`/orders/${order.id.replace("#", "")}`)}
+              key={order._id}
+              onClick={() => navigate(`/orders/${order._id}`)}
               className="p-4 cursor-pointer hover:shadow-lg transition-shadow active:scale-[0.99]"
             >
               <div className="flex justify-between items-start mb-3">
                 <div>
                   <h3 className="font-headline-md text-headline-md text-on-surface">
-                    {order.customer}
+                    {order.customerName || "Customer"}
                   </h3>
                   <p className="text-label-sm font-label-sm text-outline">
-                    Order ID: {order.id}
+                    Order ID: {order._id.slice(-8).toUpperCase()}
                   </p>
                 </div>
                 <Chip tone={meta.chip}>{meta.label}</Chip>
@@ -66,9 +81,11 @@ export default function Orders() {
                     key={i}
                     className="flex justify-between items-center text-body-md"
                   >
-                    <span>{item.name}</span>
+                    <span>
+                      {item.name} × {item.qty}
+                    </span>
                     <span className="text-on-surface-variant">
-                      {item.price}
+                      {inr(item.price * item.qty)}
                     </span>
                   </div>
                 ))}
@@ -80,7 +97,7 @@ export default function Orders() {
                     Total Amount
                   </p>
                   <p className="text-headline-md font-headline-md text-primary">
-                    {order.total}
+                    {inr(order.total)}
                   </p>
                 </div>
                 <Icon

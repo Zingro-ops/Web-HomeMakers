@@ -1,9 +1,12 @@
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, Chip } from "../components/Card";
 import Button from "../components/Button";
 import Icon from "../components/Icon";
-import { useOrder, setOrderStatus } from "../store/useOrders";
+import { useOrder, fetchOrders, updateOrderStatus } from "../store/useOrders";
 import { FLOW, statusMeta, primaryAction } from "../data/orderStatus";
+
+const inr = (n) => `₹${Number(n).toLocaleString("en-IN")}`;
 
 const steps = [
   { key: "pending", label: "Accepted", icon: "receipt_long" },
@@ -15,7 +18,22 @@ const steps = [
 export default function OrderDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const order = useOrder(`#${id}`);
+  const order = useOrder(id);
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
+  const [err, setErr] = useState("");
+
+  useEffect(() => {
+    fetchOrders().finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <main className="flex-1 px-margin-mobile pt-16 text-center animate-fade-in">
+        <p className="text-body-md text-on-surface-variant">Loading…</p>
+      </main>
+    );
+  }
 
   if (!order) {
     return (
@@ -37,9 +55,17 @@ export default function OrderDetail() {
   const activeIndex = FLOW.indexOf(order.status);
   const isRejected = order.status === "rejected";
 
-  const update = (status) => {
-    setOrderStatus(order.id, status);
-    if (status === "rejected" || status === "completed") navigate("/orders");
+  const update = async (status) => {
+    setErr("");
+    setUpdating(true);
+    try {
+      await updateOrderStatus(order._id, status);
+      if (status === "rejected" || status === "completed") navigate("/orders");
+    } catch (e) {
+      setErr(e.response?.data?.error || "Failed to update order.");
+    } finally {
+      setUpdating(false);
+    }
   };
 
   return (
@@ -52,22 +78,23 @@ export default function OrderDetail() {
         <span className="text-label-lg font-label-lg">Orders</span>
       </button>
 
-      {/* Header */}
       <Card className="p-4 mb-stack-md">
         <div className="flex justify-between items-start">
           <div>
             <h2 className="font-headline-md text-headline-md text-on-surface">
-              {order.customer}
+              {order.customerName || "Customer"}
             </h2>
             <p className="text-label-sm font-label-sm text-outline">
-              Order ID: {order.id}
+              Order ID: {order._id.slice(-8).toUpperCase()}
+            </p>
+            <p className="text-label-sm font-label-sm text-outline">
+              {order.customerPhone}
             </p>
           </div>
           <Chip tone={meta.chip}>{meta.label}</Chip>
         </div>
       </Card>
 
-      {/* Progress tracker (hidden when rejected) */}
       {!isRejected && (
         <Card className="p-4 mb-stack-md">
           <div className="flex justify-between">
@@ -110,7 +137,23 @@ export default function OrderDetail() {
         </Card>
       )}
 
-      {/* Items */}
+      {order.deliveryAddress && (
+        <Card className="p-4 mb-stack-md">
+          <h3 className="font-label-lg text-label-lg text-on-surface-variant mb-2">
+            Delivery Address
+          </h3>
+          <p className="text-body-md text-on-surface">
+            {[
+              order.deliveryAddress.building,
+              order.deliveryAddress.locality,
+              order.deliveryAddress.pincode,
+            ]
+              .filter(Boolean)
+              .join(", ")}
+          </p>
+        </Card>
+      )}
+
       <Card className="p-4 mb-stack-md">
         <h3 className="font-label-lg text-label-lg text-on-surface-variant mb-3">
           Order Items
@@ -121,8 +164,12 @@ export default function OrderDetail() {
               key={i}
               className="flex justify-between items-center text-body-md"
             >
-              <span>{item.name}</span>
-              <span className="text-on-surface-variant">{item.price}</span>
+              <span>
+                {item.name} × {item.qty}
+              </span>
+              <span className="text-on-surface-variant">
+                {inr(item.price * item.qty)}
+              </span>
             </div>
           ))}
         </div>
@@ -131,12 +178,18 @@ export default function OrderDetail() {
             Total Amount
           </span>
           <span className="text-headline-md font-headline-md text-primary">
-            {order.total}
+            {inr(order.total)}
           </span>
         </div>
       </Card>
 
-      {/* Action bar */}
+      {err && (
+        <div className="flex items-center gap-2 text-error px-4 py-3 bg-error-container rounded-lg mb-stack-md">
+          <Icon name="error" className="text-base" />
+          <span className="text-label-lg font-label-lg">{err}</span>
+        </div>
+      )}
+
       <div className="fixed bottom-24 left-0 right-0 px-margin-mobile">
         {order.status === "pending" ? (
           <div className="flex gap-3">
@@ -146,6 +199,7 @@ export default function OrderDetail() {
               onClick={() => update("rejected")}
               icon="close"
               iconRight={false}
+              disabled={updating}
             >
               Reject
             </Button>
@@ -154,8 +208,9 @@ export default function OrderDetail() {
               onClick={() => update(action.next)}
               icon={action.icon}
               iconRight={false}
+              disabled={updating}
             >
-              {action.label}
+              {updating ? "Updating..." : action.label}
             </Button>
           </div>
         ) : action ? (
@@ -164,8 +219,9 @@ export default function OrderDetail() {
             onClick={() => update(action.next)}
             icon={action.icon}
             iconRight={false}
+            disabled={updating}
           >
-            {action.label}
+            {updating ? "Updating..." : action.label}
           </Button>
         ) : (
           <Card className="p-3 text-center">
