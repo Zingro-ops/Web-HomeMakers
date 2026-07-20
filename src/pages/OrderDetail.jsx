@@ -4,8 +4,12 @@ import { Card, Chip } from "../components/Card";
 import Button from "../components/Button";
 import Icon from "../components/Icon";
 import { useOrder, fetchOrders, updateOrderStatus } from "../store/useOrders";
-import { FLOW, statusMeta, primaryAction } from "../data/orderStatus";
-
+import {
+  FLOW,
+  statusMeta,
+  primaryAction,
+  orderTypeMeta,
+} from "../data/orderStatus";
 const inr = (n) => `₹${Number(n).toLocaleString("en-IN")}`;
 
 const steps = [
@@ -93,6 +97,12 @@ export default function OrderDetail() {
           </div>
           <Chip tone={meta.chip}>{meta.label}</Chip>
         </div>
+        {order.isCluster && (
+          <div className="mt-2 flex items-center gap-1.5 text-label-lg font-label-lg text-primary">
+            <Icon name="groups" className="text-[18px]" />
+            Cluster Order · {order.clusterDiscountPercent}% discount applied
+          </div>
+        )}
       </Card>
 
       {!isRejected && (
@@ -173,13 +183,27 @@ export default function OrderDetail() {
             </div>
           ))}
         </div>
-        <div className="pt-3 mt-3 border-t border-outline-variant flex justify-between items-center">
-          <span className="text-label-sm font-label-sm text-outline">
-            Total Amount
-          </span>
-          <span className="text-headline-md font-headline-md text-primary">
-            {inr(order.total)}
-          </span>
+        <div className="pt-3 mt-3 border-t border-outline-variant space-y-1">
+          {order.isCluster && (
+            <div className="flex justify-between items-center text-label-sm font-label-sm text-on-surface-variant">
+              <span>Subtotal</span>
+              <span>{inr(order.subtotal)}</span>
+            </div>
+          )}
+          {order.isCluster && (
+            <div className="flex justify-between items-center text-label-sm font-label-sm text-primary">
+              <span>Cluster discount ({order.clusterDiscountPercent}%)</span>
+              <span>-{inr(order.subtotal - order.total)}</span>
+            </div>
+          )}
+          <div className="flex justify-between items-center">
+            <span className="text-label-sm font-label-sm text-outline">
+              Total Amount
+            </span>
+            <span className="text-headline-md font-headline-md text-primary">
+              {inr(order.total)}
+            </span>
+          </div>
         </div>
       </Card>
 

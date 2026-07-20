@@ -3,8 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, Chip } from "../components/Card";
 import Icon from "../components/Icon";
 import { useOrdersState, fetchOrders } from "../store/useOrders";
-import { statusMeta } from "../data/orderStatus";
-
+import { statusMeta, orderTypeMeta } from "../data/orderStatus";
 const tabs = ["New", "Active", "History"];
 const inr = (n) => `₹${Number(n).toLocaleString("en-IN")}`;
 
@@ -72,7 +71,15 @@ export default function Orders() {
                     Order ID: {order._id.slice(-8).toUpperCase()}
                   </p>
                 </div>
-                <Chip tone={meta.chip}>{meta.label}</Chip>
+                <div className="flex flex-col items-end gap-1">
+                  <Chip tone={meta.chip}>{meta.label}</Chip>
+                  {order.isCluster && (
+                    <span className="flex items-center gap-1 text-label-sm font-label-sm text-primary">
+                      <Icon name="groups" className="text-[14px]" /> Cluster ·{" "}
+                      {order.clusterDiscountPercent}% off
+                    </span>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-1 mb-4">
