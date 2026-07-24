@@ -1,329 +1,450 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect, useRef, useState } from "react";
-import { Card } from "../components/Card";
-import Button from "../components/Button";
-import Icon from "../components/Icon";
-
-function useReveal() {
-  const ref = useRef(null);
-  const [shown, setShown] = useState(false);
-  useEffect(() => {
-    const reduce = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    if (reduce) return setShown(true);
-    const obs = new IntersectionObserver(
-      ([e]) => e.isIntersecting && (setShown(true), obs.disconnect()),
-      { threshold: 0.15 },
-    );
-    if (ref.current) obs.observe(ref.current);
-    return () => obs.disconnect();
-  }, []);
-  return [ref, shown];
-}
-
-function Reveal({ children, className = "" }) {
-  const [ref, shown] = useReveal();
-  return (
-    <div
-      ref={ref}
-      className={`transition-all duration-700 ease-out ${
-        shown ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
-      } ${className}`}
-    >
-      {children}
-    </div>
-  );
-}
 
 const steps = [
   {
-    icon: "how_to_reg",
-    title: "Sign up & verify",
-    desc: "Register with your phone number. Quick KYC — PAN, bank, and FSSAI, done in minutes.",
+    label: "Sign up & verify",
+    desc: "Register with your phone number. Quick KYC — PAN, bank, and FSSAI — done in minutes.",
   },
   {
-    icon: "restaurant_menu",
-    title: "List your menu",
+    label: "List your menu",
     desc: "Add your dishes, prices, and photos. You choose your radius, your hours, your prices.",
   },
   {
-    icon: "trending_up",
-    title: "Start earning",
+    label: "Start earning",
     desc: "Orders land on your phone. Payouts land in your bank. No middleman, no guesswork.",
   },
 ];
 
 const features = [
   {
-    icon: "verified_user",
-    title: "Verified & Trusted",
-    desc: "Every kitchen is KYC-verified before it goes live to customers.",
+    title: "Verified & trusted",
+    desc: "Every kitchen is KYC and FSSAI verified before it goes live, so customers order with confidence.",
   },
   {
-    icon: "payments",
-    title: "Fair Payouts",
-    desc: "Transparent commission. Money moves straight to your account.",
+    title: "Fair payouts",
+    desc: "A transparent commission and payouts straight to your bank account. No hidden deductions.",
   },
   {
-    icon: "smartphone",
-    title: "Runs From Your Phone",
-    desc: "No laptop, no dashboard to learn. Just your phone and your kitchen.",
+    title: "Runs from your phone",
+    desc: "No laptop, no dashboard to learn. Manage orders, menus, and hours from your phone.",
   },
   {
-    icon: "support_agent",
-    title: "A Team That Answers",
-    desc: "Real people on the other end when you need help.",
+    title: "A team that answers",
+    desc: "Real people on the other end when you have a question — not a bot, not a ticket queue.",
   },
 ];
 
+const faqs = [
+  {
+    q: "Who can become a homemaker partner?",
+    a: "Anyone in Bengaluru who cooks and wants to sell food from home. You'll need a PAN, a bank account, and FSSAI registration — we'll guide you through getting one if you don't already have it.",
+  },
+  {
+    q: "How much does it cost to join?",
+    a: "Signing up is free. Zingro takes a transparent commission only on orders you actually receive.",
+  },
+  {
+    q: "How do I get paid?",
+    a: "Payouts are transferred directly to your registered bank account on a regular cycle. You can track every order and payment from your phone.",
+  },
+  {
+    q: "Can I set my own hours and prices?",
+    a: "Yes. You decide your delivery radius, the hours you're open, and what you charge for each dish.",
+  },
+  {
+    q: "When can customers start ordering?",
+    a: "We're onboarding homemaker partners first. The customer app is coming soon — you'll be ready the moment it opens.",
+  },
+];
+
+function DoorbellMark({ className = "" }) {
+  return (
+    <svg
+      viewBox="0 0 64 64"
+      fill="none"
+      className={className}
+      aria-hidden="true"
+    >
+      <rect
+        x="20"
+        y="8"
+        width="24"
+        height="48"
+        rx="10"
+        stroke="#ff6b00"
+        strokeWidth="2.5"
+      />
+      <circle cx="32" cy="26" r="6" stroke="#ff6b00" strokeWidth="2.5" />
+      <line
+        x1="32"
+        y1="40"
+        x2="32"
+        y2="46"
+        stroke="#ff6b00"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function CheckIcon({ className = "" }) {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="none"
+      className={className}
+      aria-hidden="true"
+    >
+      <path
+        d="M4 10.5L8 14.5L16 6"
+        stroke="#0051d5"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export default function Landing() {
   const navigate = useNavigate();
-  const [showCustomerNote, setShowCustomerNote] = useState(false);
-  const [rung, setRung] = useState(false);
-
-  const ringBell = () => {
-    setRung(true);
-    setTimeout(() => setRung(false), 1400);
-  };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background overflow-x-hidden">
-      <header className="sticky top-0 z-40 w-full bg-background/85 backdrop-blur-sm border-b border-outline-variant/60">
-        <div className="flex justify-between items-center w-full max-w-2xl mx-auto px-margin-mobile h-touch-target-min">
-          <span className="text-[22px] font-black text-primary tracking-tight">
+    <div
+      className="min-h-screen flex flex-col"
+      style={{ backgroundColor: "#fcf9f8", color: "#151c27" }}
+    >
+      {/* Header */}
+      <header
+        className="w-full border-b sticky top-0 z-10"
+        style={{ borderColor: "#151c2714", backgroundColor: "#fcf9f8" }}
+      >
+        <div className="max-w-6xl mx-auto px-6 md:px-10 h-16 flex items-center justify-between">
+          <span
+            className="text-xl tracking-tight"
+            style={{ fontWeight: 800, color: "#ff6b00" }}
+          >
             ZINGRO
           </span>
-          <button
-            onClick={() => navigate("/language")}
-            aria-label="Change language"
-            className="w-touch-target-min h-touch-target-min flex items-center justify-center text-on-surface-variant hover:text-primary active:scale-95 transition-all"
+          <a
+            href="#faq"
+            className="text-sm hover:opacity-70 transition-opacity"
+            style={{ color: "#151c27b3", fontWeight: 600 }}
           >
-            <Icon name="language" />
-          </button>
+            Questions?
+          </a>
         </div>
       </header>
 
       {/* Hero */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 -z-10 pointer-events-none">
-          <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-primary-fixed opacity-70 blur-[80px]" />
-          <div className="absolute top-40 -left-20 w-72 h-72 rounded-full bg-secondary-fixed opacity-60 blur-[90px]" />
-          <div className="absolute bottom-0 right-10 w-56 h-56 rounded-full bg-tertiary-fixed opacity-50 blur-[70px]" />
-        </div>
+      <section className="w-full">
+        <div className="max-w-6xl mx-auto px-6 md:px-10 pt-12 md:pt-20 pb-14 md:pb-24">
+          <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+            {/* Text */}
+            <div className="max-w-xl">
+              <DoorbellMark className="w-10 h-10 mb-6" />
 
-        <div className="max-w-2xl mx-auto px-margin-mobile pt-stack-lg pb-10">
-          <span className="inline-block text-label-sm font-label-sm uppercase tracking-[0.15em] text-primary mb-3">
-            Now serving Bengaluru
-          </span>
-          <h1 className="text-[38px] sm:text-[46px] leading-[1.05] font-black text-on-surface tracking-tight mb-4">
-            We gave home
-            <br />
-            kitchens a{" "}
-            <span className="relative inline-block text-primary">
-              doorbell.
-            </span>
-          </h1>
-          <p className="text-body-lg text-on-surface-variant max-w-md mb-8">
-            Zingro turns everyday home kitchens into verified food businesses —
-            real recipes, real cooks, real earnings.
-          </p>
-
-          {/* Doorbell signature moment */}
-          <div className="relative rounded-[28px] overflow-hidden bg-gradient-to-br from-tertiary-fixed via-primary-fixed to-secondary-fixed h-64 sm:h-72 mb-6 flex items-center justify-center">
-            <img
-              src="/hero-kitchen.jpg"
-              alt="A homemaker cooking in her kitchen"
-              onError={(e) => (e.currentTarget.style.display = "none")}
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/0 to-transparent" />
-
-            <button
-              onClick={ringBell}
-              aria-label="Ring the doorbell"
-              className="absolute bottom-5 right-5 flex items-center gap-3"
-            >
-              {rung && (
-                <span className="text-label-sm font-label-sm bg-surface-container-lowest text-on-surface px-3 py-1.5 rounded-full shadow-modal animate-fade-in">
-                  Ding! That's Zingro.
-                </span>
-              )}
-              <span className="relative flex items-center justify-center w-16 h-16 rounded-full bg-primary text-on-primary shadow-modal active:scale-90 transition-transform">
-                {rung && (
-                  <span className="absolute inset-0 rounded-full bg-primary animate-ping opacity-60" />
-                )}
-                <Icon
-                  name="notifications_active"
-                  className="text-[28px] relative"
-                  fill
-                />
-              </span>
-            </button>
-          </div>
-
-          <div className="flex flex-col gap-stack-sm">
-            <Button
-              full
-              icon="arrow_forward"
-              onClick={() => navigate("/language")}
-              className="h-14"
-            >
-              Become a Homemaker Partner
-            </Button>
-            <Button
-              full
-              variant="outline"
-              icon="restaurant"
-              iconRight={false}
-              onClick={() => setShowCustomerNote((v) => !v)}
-            >
-              Order Food
-            </Button>
-          </div>
-
-          {showCustomerNote && (
-            <div className="mt-4 p-4 rounded-xl bg-secondary-fixed text-on-secondary-fixed animate-fade-in">
-              <p className="text-label-lg font-label-lg mb-1">Coming soon</p>
-              <p className="text-body-md opacity-90">
-                The Zingro customer app is on its way — check back soon to order
-                home-cooked meals near you.
-              </p>
-            </div>
-          )}
-
-          <div className="flex flex-wrap gap-2 mt-6">
-            {[
-              { icon: "eco", label: "100% Home Cooked" },
-              { icon: "verified", label: "FSSAI Verified" },
-              { icon: "location_on", label: "Made in Bengaluru" },
-            ].map((b) => (
               <span
-                key={b.label}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-lowest border border-outline-variant text-label-sm font-label-sm text-on-surface-variant"
+                className="inline-block text-xs uppercase tracking-[0.15em] mb-4 px-3 py-1 rounded-full"
+                style={{
+                  backgroundColor: "#ff6b0014",
+                  color: "#ff6b00",
+                  fontWeight: 700,
+                }}
               >
-                <Icon name={b.icon} className="text-[16px] text-primary" />
-                {b.label}
+                Now recruiting in Bengaluru
               </span>
-            ))}
+
+              <h1
+                className="text-[32px] sm:text-[38px] md:text-[46px] leading-[1.15] mb-5"
+                style={{ fontWeight: 800, letterSpacing: "-0.02em" }}
+              >
+                We gave home kitchens a doorbell.
+              </h1>
+
+              <p
+                className="text-base md:text-lg leading-relaxed mb-8 max-w-md"
+                style={{ color: "#151c27b3" }}
+              >
+                Zingro connects home cooks in Bengaluru with neighbours looking
+                for a real, home-cooked meal. Turn your kitchen into a verified
+                food business — on your own terms.
+              </p>
+
+              <button
+                onClick={() => navigate("/language")}
+                className="w-full sm:w-auto px-8 h-14 rounded-full text-base transition-opacity hover:opacity-90 mb-6"
+                style={{
+                  backgroundColor: "#ff6b00",
+                  color: "#fcf9f8",
+                  fontWeight: 700,
+                }}
+              >
+                Become a Homemaker Partner
+              </button>
+
+              <div className="flex flex-wrap gap-x-6 gap-y-2">
+                {["Free to join", "FSSAI verified", "Payouts to your bank"].map(
+                  (item) => (
+                    <span
+                      key={item}
+                      className="flex items-center gap-1.5 text-sm"
+                      style={{ color: "#151c27b3", fontWeight: 600 }}
+                    >
+                      <CheckIcon className="w-4 h-4 shrink-0" />
+                      {item}
+                    </span>
+                  ),
+                )}
+              </div>
+            </div>
+
+            {/* Image */}
+            <div className="relative w-full aspect-[4/3] sm:aspect-[16/10] lg:aspect-[4/5] rounded-3xl overflow-hidden">
+              <img
+                src="/hero-kitchen.png"
+                alt="A homemaker cooking in her home kitchen"
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            </div>
           </div>
         </div>
       </section>
 
       {/* How it works */}
-      <section className="max-w-2xl mx-auto w-full px-margin-mobile py-stack-lg">
-        <Reveal>
-          <h2 className="text-headline-md font-headline-md text-on-surface mb-1">
-            From your stove to their doorstep
-          </h2>
-          <p className="text-body-md text-on-surface-variant mb-stack-lg">
-            Three steps. About ten minutes.
-          </p>
-        </Reveal>
-        <div className="flex flex-col gap-stack-md">
-          {steps.map((s, i) => (
-            <Reveal key={s.title}>
-              <Card className="p-4 flex items-start gap-4">
-                <div className="w-11 h-11 shrink-0 rounded-full bg-primary text-on-primary flex items-center justify-center font-headline-md font-headline-md">
-                  {i + 1}
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Icon name={s.icon} className="text-primary text-[20px]" />
-                    <h3 className="font-label-lg text-label-lg text-on-surface">
-                      {s.title}
-                    </h3>
+      <section className="w-full">
+        <div
+          className="max-w-6xl mx-auto px-6 md:px-10 py-14 md:py-20 border-t"
+          style={{ borderColor: "#151c2714" }}
+        >
+          <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+            <div className="max-w-xl">
+              <span
+                className="text-xs uppercase tracking-[0.15em]"
+                style={{ color: "#0051d5", fontWeight: 700 }}
+              >
+                Getting started
+              </span>
+              <h2
+                className="text-2xl md:text-3xl mt-2 mb-1"
+                style={{ fontWeight: 800, letterSpacing: "-0.01em" }}
+              >
+                From your stove to their doorstep
+              </h2>
+              <p className="text-base mb-10" style={{ color: "#151c27b3" }}>
+                Three steps. About ten minutes.
+              </p>
+
+              <div className="flex flex-col gap-10">
+                {steps.map((step, i) => (
+                  <div key={step.label} className="flex gap-5">
+                    <span
+                      className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-sm"
+                      style={{
+                        backgroundColor: "#0051d5",
+                        color: "#fcf9f8",
+                        fontWeight: 700,
+                      }}
+                    >
+                      {i + 1}
+                    </span>
+                    <div>
+                      <h3 className="text-lg mb-1" style={{ fontWeight: 700 }}>
+                        {step.label}
+                      </h3>
+                      <p
+                        className="text-base leading-relaxed"
+                        style={{ color: "#151c27b3" }}
+                      >
+                        {step.desc}
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-body-md text-on-surface-variant">
-                    {s.desc}
-                  </p>
-                </div>
-              </Card>
-            </Reveal>
-          ))}
+                ))}
+              </div>
+            </div>
+
+            {/* Supporting image — hidden on mobile to keep the flow scannable */}
+            <div className="hidden lg:block relative w-full aspect-[4/5] rounded-3xl overflow-hidden">
+              <img
+                src="cook-action.png"
+                alt="Close-up of home-cooked dishes being plated"
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Features */}
-      <section className="max-w-2xl mx-auto w-full px-margin-mobile py-stack-lg">
-        <Reveal>
-          <h2 className="text-headline-md font-headline-md text-on-surface mb-stack-lg">
+      {/* Why homemakers choose Zingro */}
+      <section className="w-full">
+        <div
+          className="max-w-6xl mx-auto px-6 md:px-10 py-14 md:py-20 border-t"
+          style={{ borderColor: "#151c2714" }}
+        >
+          <h2
+            className="text-2xl md:text-3xl mb-10"
+            style={{ fontWeight: 800, letterSpacing: "-0.01em" }}
+          >
             Why homemakers choose Zingro
           </h2>
-        </Reveal>
-        <div className="grid grid-cols-2 gap-stack-sm">
-          {features.map((f) => (
-            <Reveal key={f.title}>
-              <Card className="p-4 h-full">
-                <div className="w-10 h-10 rounded-full bg-secondary-fixed text-secondary flex items-center justify-center mb-3">
-                  <Icon name={f.icon} className="text-[20px]" />
-                </div>
-                <h3 className="font-label-lg text-label-lg text-on-surface mb-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {features.map((f) => (
+              <div key={f.title}>
+                <h3 className="text-base mb-1.5" style={{ fontWeight: 700 }}>
                   {f.title}
                 </h3>
-                <p className="text-label-sm font-label-sm text-on-surface-variant">
+                <p
+                  className="text-base leading-relaxed"
+                  style={{ color: "#151c27b3" }}
+                >
                   {f.desc}
                 </p>
-              </Card>
-            </Reveal>
-          ))}
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Voice quote */}
-      <section className="max-w-2xl mx-auto w-full px-margin-mobile py-stack-lg">
-        <Reveal>
-          <Card className="p-6 bg-tertiary-fixed border-none">
-            <Icon
-              name="format_quote"
-              className="text-tertiary text-[32px] mb-2"
-            />
-            <p className="text-headline-md font-headline-md text-on-tertiary-fixed mb-2">
-              Every home kitchen has a story worth tasting.
-            </p>
-            <p className="text-body-md text-on-tertiary-fixed opacity-80">
-              Zingro exists to help you tell yours — and get paid for it.
-            </p>
-          </Card>
-        </Reveal>
+      {/* Quote */}
+      <section className="w-full">
+        <div
+          className="max-w-6xl mx-auto px-6 md:px-10 py-14 md:py-20 border-t"
+          style={{ borderColor: "#151c2714" }}
+        >
+          <div
+            className="rounded-2xl p-8 md:p-10 max-w-3xl mx-auto flex flex-col sm:flex-row gap-6 items-start sm:items-center"
+            style={{ backgroundColor: "#0051d50d" }}
+          >
+            <div className="w-16 h-16 rounded-full overflow-hidden shrink-0">
+              <img
+                src="home-pot.png"
+                alt="Portrait of a Zingro homemaker partner"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div>
+              <p
+                className="text-xl leading-snug mb-3"
+                style={{ fontWeight: 700, letterSpacing: "-0.01em" }}
+              >
+                Every home kitchen has a story worth tasting.
+              </p>
+              <p className="text-base" style={{ color: "#151c27b3" }}>
+                Zingro exists to help you tell yours — and get paid for it.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="w-full">
+        <div
+          className="max-w-3xl mx-auto px-6 md:px-10 py-14 md:py-20 border-t"
+          style={{ borderColor: "#151c2714" }}
+        >
+          <h2
+            className="text-2xl md:text-3xl mb-8"
+            style={{ fontWeight: 800, letterSpacing: "-0.01em" }}
+          >
+            Common questions
+          </h2>
+          <div className="flex flex-col">
+            {faqs.map((item, i) => (
+              <details
+                key={item.q}
+                className="group py-5"
+                style={{
+                  borderTop: i === 0 ? "none" : "1px solid #151c2714",
+                }}
+              >
+                <summary
+                  className="flex items-center justify-between cursor-pointer list-none text-base"
+                  style={{ fontWeight: 700 }}
+                >
+                  {item.q}
+                  <span
+                    className="ml-4 shrink-0 text-lg group-open:rotate-45 transition-transform"
+                    style={{ color: "#ff6b00" }}
+                  >
+                    +
+                  </span>
+                </summary>
+                <p
+                  className="text-base leading-relaxed mt-3 max-w-md"
+                  style={{ color: "#151c27b3" }}
+                >
+                  {item.a}
+                </p>
+              </details>
+            ))}
+          </div>
+        </div>
       </section>
 
       {/* Final CTA */}
-      <section className="max-w-2xl mx-auto w-full px-margin-mobile py-stack-lg">
-        <Reveal>
-          <Card className="p-6 text-center bg-primary-fixed border-none">
-            <h2 className="text-headline-md font-headline-md text-on-primary-fixed mb-2">
+      <section className="w-full">
+        <div
+          className="max-w-6xl mx-auto px-6 md:px-10 py-14 md:py-20 border-t"
+          style={{ borderColor: "#151c2714" }}
+        >
+          <div
+            className="rounded-2xl p-8 md:p-14 text-center max-w-3xl mx-auto"
+            style={{ backgroundColor: "#ff6b00" }}
+          >
+            <h2
+              className="text-2xl md:text-3xl mb-2"
+              style={{
+                fontWeight: 800,
+                color: "#fcf9f8",
+                letterSpacing: "-0.01em",
+              }}
+            >
               Ready to turn your kitchen into a business?
             </h2>
-            <p className="text-body-md text-on-primary-fixed opacity-80 mb-stack-md">
-              Onboarding takes about 10 minutes.
-            </p>
-            <Button
-              full
-              icon="arrow_forward"
-              onClick={() => navigate("/language")}
+            <p
+              className="text-base mb-7"
+              style={{ color: "#fcf9f8", opacity: 0.9 }}
             >
-              Get Started
-            </Button>
-          </Card>
-        </Reveal>
+              Onboarding takes about ten minutes.
+            </p>
+            <button
+              onClick={() => navigate("/language")}
+              className="w-full sm:w-auto px-8 h-14 rounded-full text-base transition-opacity hover:opacity-90"
+              style={{
+                backgroundColor: "#fcf9f8",
+                color: "#ff6b00",
+                fontWeight: 700,
+              }}
+            >
+              Become a Homemaker Partner
+            </button>
+          </div>
+        </div>
       </section>
 
-      <footer className="mt-auto py-stack-lg border-t border-outline-variant">
-        <div className="max-w-2xl mx-auto w-full px-margin-mobile flex flex-col items-center gap-3 text-center">
-          <span className="text-[20px] font-black text-primary tracking-tight">
+      {/* Footer */}
+      <footer
+        className="mt-auto w-full border-t"
+        style={{ borderColor: "#151c2714" }}
+      >
+        <div className="max-w-6xl mx-auto px-6 md:px-10 py-10 flex flex-col items-center gap-3 text-center">
+          <span
+            className="text-lg tracking-tight"
+            style={{ fontWeight: 800, color: "#ff6b00" }}
+          >
             ZINGRO
           </span>
           <button
             onClick={() => navigate("/contact")}
-            className="text-label-lg font-label-lg text-on-surface-variant hover:text-primary transition-colors"
+            className="text-sm hover:opacity-70 transition-opacity"
+            style={{ color: "#151c27b3", fontWeight: 600 }}
           >
             Contact & Support
           </button>
-          <p className="text-label-sm text-outline uppercase tracking-widest">
-            Empowering Home Chefs Everywhere
-          </p>
-          <p className="text-label-sm text-outline">
+          <p className="text-sm" style={{ color: "#151c2780" }}>
             © {new Date().getFullYear()} Zingro. All rights reserved.
           </p>
         </div>
