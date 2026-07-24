@@ -8,7 +8,12 @@ export const statusMeta = {
   completed: { label: "Completed", chip: "neutral", tab: "History" },
   rejected: { label: "Rejected", chip: "neutral", tab: "History" },
 };
-
+// Order type metadata — shown as a badge/label per order
+export const orderTypeMeta = {
+  delivery: { label: "Delivery", icon: "local_shipping", chip: "neutral" },
+  pickup: { label: "Pickup", icon: "storefront", chip: "neutral" },
+  scheduled: { label: "Scheduled", icon: "schedule", chip: "neutral" },
+};
 // Primary CTA shown per status on the detail screen
 export const primaryAction = {
   pending: { label: "Accept Order", next: "preparing", icon: "check_circle" },
