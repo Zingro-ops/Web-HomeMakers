@@ -42,8 +42,6 @@ export const EP = {
   cart: "/api/cart",
   cartItems: "/api/cart/items",
   cartItem: (dishId) => `/api/cart/items/${dishId}`,
-  cartCheckout: "/api/cart/checkout",
-  orders: "/api/orders",
   ordersMine: "/api/orders/mine",
   order: (id) => `/api/orders/${id}`,
   orderCancel: (id) => `/api/orders/${id}/cancel`,

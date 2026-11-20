@@ -40,7 +40,6 @@ export const orders = {
   mine: () => get(EP.ordersMine), // raw
   one: (id) => get(EP.order(id)), // raw
   cancel: (id) => post(EP.orderCancel(id)), // only while status==='pending'
-  placeNoPayment: (body) => post(EP.cartCheckout, body),
 };
 
 export const tracking = { get: (id) => get(EP.delivery(id)) };

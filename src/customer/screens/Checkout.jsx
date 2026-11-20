@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import {
   addresses as addrApi,
   checkout as checkoutApi,
-  orders as ordersApi,
 } from "../api/services";
 import { useRazorpay } from "../payments/useRazorpay";
 import { getUser } from "../auth/session";
@@ -57,28 +56,6 @@ export default function Checkout() {
     } catch (e) {
       if (e.message !== "PAYMENT_CANCELLED")
         setErr(e.body?.message || e.message);
-    } finally {
-      setBusy("");
-    }
-  }
-
-  async function placeNoPayment() {
-    setBusy("cod");
-    setErr("");
-    const a = addrs.find((x) => x._id === addressId);
-    try {
-      const order = await ordersApi.placeNoPayment({
-        orderType: "quick",
-        deliveryAddress: {
-          building: a.line1,
-          locality: a.city,
-          pincode: a.pincode,
-        },
-        customerName: user?.phone,
-      });
-      nav(`/customer/orders/${order._id}`, { replace: true });
-    } catch (e) {
-      setErr(e.body?.error || e.body?.message || e.message);
     } finally {
       setBusy("");
     }
@@ -158,13 +135,8 @@ export default function Checkout() {
           ? "Opening Razorpay…"
           : `Pay ₹${breakdown?.grandTotal ?? ""}`}
       </button>
-      <button
-        className="zc-btn zc-btn-ghost"
-        disabled={!breakdown || busy}
-        onClick={placeNoPayment}
-      >
-        {busy === "cod" ? "Placing…" : "Place order (no payment)"}
-      </button>
+      {/* "Place order (no payment)" was removed: it called POST /api/cart/checkout,
+          which created unpaid orders. The backend now answers it with 410. */}
     </div>
   );
 }
